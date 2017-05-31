@@ -8,7 +8,7 @@ Of course, this is completely barmy, because every router does the same, but in 
 
 ## usage
 
-`tsonamu.exe [-hostname url] [-nolog]
+`tsonamu.exe [-hostname url] [-nolog]`
 
 -hostname url   this url will be pinged to check the functionality of the internet connection.
 -nolog          if this argument exists, no log file will be written

@@ -16,3 +16,7 @@ Of course, this is completely barmy, because every router does the same, but in 
 ## icon
 
 Yay, I made an icon for an obsolete program. It's actually the most sophisticated thing about the software, so I'll include it. It's a whopping 16 by 16 pixels, which makes impressive 256 pixels².
+
+## future plans
+
+I'm not sure what I'm gonna make of this. I might add a taskbar icon to inform the user (that's me) of sudden increases in ping and failure/return of their internet connection. Who knows. Maybe not. Or maybe. Did I mention I code when I'm bored?

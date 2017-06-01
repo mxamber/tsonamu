@@ -1,8 +1,12 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Reflection;
 using System.Timers;
 using System.Net.NetworkInformation;
+
+using System.Drawing;
+using System.Windows.Forms;
 
 using tsonamu;
 
@@ -10,6 +14,8 @@ namespace tsonamu
 {
 	class MainClass
 	{
+		public static NotifyIcon tray;
+
 		public static System.Timers.Timer WriteWithDelay (String[] texts, double delay = 1)
 		{
 			Console.WriteLine(texts[0]);
@@ -39,6 +45,9 @@ namespace tsonamu
 		{
 			LogWriter Logger = new LogWriter (filename);
 
+			bool connection = true;
+			int last_ping = 50;
+
 			if (log == true) {
 				Logger.LogText ("[" + DateTime.Now.ToString ("yyyy-MM-dd") + "] " + hostname, true);
 			}
@@ -53,10 +62,40 @@ namespace tsonamu
 				Ping pinging = new Ping ();
 				try {
 					PingReply pingstatus = pinging.Send (hostname);
+					if(pingstatus.Status != IPStatus.Success) {
+						throw(new Exception("Ping unsuccessful!"));
+					}
 					Console.WriteLine (TimeInBrackets () + " " + pingstatus.Status.ToString () + ": " + pingstatus.RoundtripTime.ToString () + "ms");
 					if(log == true) { Logger.LogText (TimeInBrackets () + " " + pingstatus.Status.ToString () + ": " + pingstatus.RoundtripTime.ToString () + "ms", true); }
+
+					if(connection == false) {
+						tray.BalloonTipTitle = "tsonamu";
+						tray.BalloonTipText = "Internet connection re-established!";
+						tray.BalloonTipIcon = ToolTipIcon.Info;
+						tray.ShowBalloonTip(5000);
+
+						connection = true;
+					}
+
+					if((pingstatus.RoundtripTime / last_ping) > 4 && last_ping > 250) {
+						tray.BalloonTipTitle = "tsonamu";
+						tray.BalloonTipText = "Dramatic ping increase!";
+						tray.BalloonTipIcon = ToolTipIcon.Warning;
+						tray.ShowBalloonTip(5000);
+					}
+
+
+					if((pingstatus.RoundtripTime / last_ping) > 4 && last_ping > 250) {
+						tray.BalloonTipTitle = "tsonamu";
+						tray.BalloonTipText = "Ping has returned to normal!";
+						tray.BalloonTipIcon = ToolTipIcon.Info;
+						tray.ShowBalloonTip(5000);
+					}
+
+
 				} catch {
 					Console.ForegroundColor = ConsoleColor.Red;
+
 
 					if (Uri.CheckHostName (hostname) == UriHostNameType.Unknown) {
 						Console.WriteLine (TimeInBrackets () + " Can't resolve hostname: " + hostname);
@@ -64,6 +103,15 @@ namespace tsonamu
 					} else {
 						Console.WriteLine (TimeInBrackets () + " Error!");
 						if(log == true) { Logger.LogText(TimeInBrackets () + " ERR", true); }
+					}
+
+					if(connection == true) {
+						tray.BalloonTipTitle = "tsonamu";
+						tray.BalloonTipText = "Internet connection was lost!";
+						tray.BalloonTipIcon = ToolTipIcon.Error;
+						tray.ShowBalloonTip(5000);
+
+						connection = false;
 					}
 
 					Console.ForegroundColor = defaultcolor;
@@ -81,13 +129,21 @@ namespace tsonamu
 
 		public static void Main (string[] args)
 		{
+			tray = new NotifyIcon();
+			Icon appicon = Icon.ExtractAssociatedIcon (Assembly.GetExecutingAssembly ().Location);
+			tray.Icon = appicon;
+			tray.Visible = true;
+
+
+
+
 			string hostname = "google.com";
 			bool log = true;
 			
 			if (args.Length != 0) {
 				string arguments = string.Join (" ", args, 0, args.Length);
 
-				Regex regexHelp = new Regex("/?");
+				Regex regexHelp = new Regex(@"/\?");
 				Match matchHelp = regexHelp.Match (arguments);
 				if (matchHelp.Success)
 				{
@@ -145,12 +201,14 @@ namespace tsonamu
 			Console.WriteLine ("[" + DateTime.Now.ToString ("HH:mm:ss") + "] Observation started!");
 
 			if (log == true) {
-				monitorStatus (hostname, logfile);
+				monitorStatus (hostname, logfile, true, 5);
 			} else {
-				monitorStatus (hostname, logfile, false);
+				monitorStatus (hostname, logfile, false, 5);
 			}
 
 			Console.ReadLine ();
+			tray.Visible = false;
+			tray.Dispose ();
 
 		}
 	}

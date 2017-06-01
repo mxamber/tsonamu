@@ -20,9 +20,5 @@ Yay, I made an icon for an obsolete program. It's actually the most sophisticate
 ## future plans
 
 I'm not sure what I'm gonna make of this. ~~I might add a taskbar icon to inform the user (that's me) of sudden increases in ping and failure/return of their internet connection. Who knows. Maybe not. Or maybe. Did I mention I code when I'm bored?~~
- 
-/|\
- |
- |
 
 Oh, look, I did that.
